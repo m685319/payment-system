@@ -12,5 +12,5 @@ public class Order {
     private UUID id;
     private BigDecimal amount;
     private String currency;
-    private String status;
+    private OrderStatus status;
 }

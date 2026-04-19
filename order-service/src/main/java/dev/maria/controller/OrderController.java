@@ -2,6 +2,7 @@ package dev.maria.controller;
 
 import dev.maria.dto.CreateOrderRequest;
 import dev.maria.dto.CreateOrderResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class OrderController {
 
     @PostMapping
-    public CreateOrderResponse createOrder(@RequestBody CreateOrderRequest request) {
+    public CreateOrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
         return new CreateOrderResponse(UUID.randomUUID(),"NEW");
     }
 }

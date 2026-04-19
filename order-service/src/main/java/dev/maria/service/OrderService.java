@@ -3,6 +3,7 @@ package dev.maria.service;
 import dev.maria.dto.CreateOrderRequest;
 import dev.maria.dto.CreateOrderResponse;
 import dev.maria.entity.Order;
+import dev.maria.entity.OrderStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -21,10 +22,10 @@ public class OrderService {
         order.setId(id);
         order.setAmount(request.amount());
         order.setCurrency(request.currency());
-        order.setStatus("NEW");
+        order.setStatus(OrderStatus.NEW);
 
         storage.put(id, order);
 
-        return new CreateOrderResponse(id, "NEW");
+        return new CreateOrderResponse(id, OrderStatus.NEW.name());
     }
 }
