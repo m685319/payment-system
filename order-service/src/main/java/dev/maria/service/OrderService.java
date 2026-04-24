@@ -3,6 +3,7 @@ package dev.maria.service;
 import dev.maria.dto.CreateOrderRequest;
 import dev.maria.entity.Order;
 import dev.maria.entity.OrderStatus;
+import dev.maria.exception.OrderNotFoundException;
 import dev.maria.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,8 @@ public class OrderService {
     public Order getById(UUID id) {
         Order order = storage.get(id);
         if (order == null) {
-            throw new RuntimeException("Order not found");
+            throw new OrderNotFoundException(id);
         }
         return order;
     }
-
 }
