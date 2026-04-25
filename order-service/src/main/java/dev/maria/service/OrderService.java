@@ -5,18 +5,17 @@ import dev.maria.entity.Order;
 import dev.maria.entity.OrderStatus;
 import dev.maria.exception.OrderNotFoundException;
 import dev.maria.mapper.OrderMapper;
+import dev.maria.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final Map<UUID, Order> storage = new ConcurrentHashMap<>();
+    private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
 
     public Order create(CreateOrderRequest request) {
@@ -26,15 +25,11 @@ public class OrderService {
         order.setId(id);
         order.setStatus(OrderStatus.NEW);
 
-        storage.put(id, order);
-        return order;
+        return orderRepository.save(order);
     }
 
     public Order getById(UUID id) {
-        Order order = storage.get(id);
-        if (order == null) {
-            throw new OrderNotFoundException(id);
-        }
-        return order;
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
     }
 }
