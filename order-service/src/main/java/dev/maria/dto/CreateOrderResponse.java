@@ -1,6 +1,6 @@
 package dev.maria.dto;
 
-import dev.maria.entity.OrderStatus;
+import dev.maria.domain.OrderStatus;
 
 import java.util.UUID;
 
