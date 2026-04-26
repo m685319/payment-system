@@ -12,25 +12,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler()
+    @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleNotFound(OrderNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage(), ErrorCode.ORDER_NOT_FOUND));
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage(), ErrorCode.BAD_REQUEST));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric() {
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("Internal error", ErrorCode.INTERNAL_ERROR));
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult()
                 .getFieldErrors()

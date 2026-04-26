@@ -2,8 +2,7 @@ package dev.maria.controller;
 
 import dev.maria.dto.CreateOrderRequest;
 import dev.maria.dto.CreateOrderResponse;
-import dev.maria.entity.Order;
-import dev.maria.mapper.OrderMapper;
+import dev.maria.exception.OrderNotFoundException;
 import dev.maria.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +23,16 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
-    private final OrderMapper orderMapper;
 
     @PostMapping
     public ResponseEntity<CreateOrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        Order order = orderService.create(request);
-        CreateOrderResponse response = orderMapper.toResponse(order);
+        CreateOrderResponse response = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CreateOrderResponse> get(@PathVariable("id") UUID id) {
-        Order order = orderService.getById(id);
-        return ResponseEntity.ok(orderMapper.toResponse(order));
+    public ResponseEntity<CreateOrderResponse> get(@PathVariable("id") UUID id) throws OrderNotFoundException {
+        CreateOrderResponse response = orderService.getById(id);
+        return ResponseEntity.ok(response);
     }
 }
