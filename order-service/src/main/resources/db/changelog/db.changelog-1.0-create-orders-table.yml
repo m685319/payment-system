@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0-create-orders-table
+      author: maria
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: amount
+                  type: numeric(38,2)
+
+              - column:
+                  name: currency
+                  type: varchar(255)
+
+              - column:
+                  name: status
+                  type: varchar(50)
