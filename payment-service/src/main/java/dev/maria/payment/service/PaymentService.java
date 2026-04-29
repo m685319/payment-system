@@ -5,5 +5,5 @@ import dev.maria.payment.dto.ProcessPaymentResponse;
 
 public interface PaymentService {
 
-    ProcessPaymentResponse process(ProcessPaymentRequest request);
+    ProcessPaymentResponse process(String key, ProcessPaymentRequest request);
 }

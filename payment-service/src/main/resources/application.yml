@@ -2,6 +2,14 @@ server:
   port: 8082
 
 spring:
+  datasource:
+    url: ${PAYMENT_DB_URL}
+    username: ${PAYMENT_DB_USER}
+    password: ${PAYMENT_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   resilience4j:
     retry:
       instances:

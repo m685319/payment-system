@@ -1,10 +1,23 @@
 version: '3.8'
 
 services:
-  postgres:
+
+  order-postgres:
     image: postgres:15
-    container_name: payment-postgres
-    env_file:
-      - .env
+    container_name: order-postgres
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: ${ORDER_DB_USER}
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD}
     ports:
       - "5432:5432"
+
+  payment-postgres:
+    image: postgres:15
+    container_name: payment-postgres
+    environment:
+      POSTGRES_DB: payment
+      POSTGRES_USER: ${PAYMENT_DB_USER}
+      POSTGRES_PASSWORD: ${PAYMENT_DB_PASSWORD}
+    ports:
+      - "5433:5432"
