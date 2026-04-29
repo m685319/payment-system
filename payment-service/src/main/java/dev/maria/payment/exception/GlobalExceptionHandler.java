@@ -15,4 +15,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage(), ErrorCode.ORDER_NOT_FOUND));
     }
+
+    @ExceptionHandler
+    public ErrorResponse handleUnavailable(OrderServiceUnavailableException ex) {
+        return new ErrorResponse(ex.getMessage(), ErrorCode.INTERNAL_ERROR);
+    }
 }

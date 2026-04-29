@@ -1,2 +1,28 @@
 server:
   port: 8082
+
+spring:
+  resilience4j:
+    retry:
+      instances:
+        orderClient:
+          max-attempts: 3
+          wait-duration: 500ms
+
+    circuitbreaker:
+      instances:
+        orderClient:
+          sliding-window-size: 10
+          minimum-number-of-calls: 5
+          failure-rate-threshold: 50
+          wait-duration-in-open-state: 5s
+
+logging:
+  level:
+    dev.maria.payment.service: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
