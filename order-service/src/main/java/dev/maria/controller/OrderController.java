@@ -31,7 +31,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CreateOrderResponse> get(@PathVariable("id") UUID id) throws OrderNotFoundException {
+    public ResponseEntity<CreateOrderResponse> get(@PathVariable UUID id) throws OrderNotFoundException {
         CreateOrderResponse response = orderService.getById(id);
         return ResponseEntity.ok(response);
     }

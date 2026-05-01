@@ -12,7 +12,6 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -30,40 +29,46 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @CircuitBreaker(name = "orderClient", fallbackMethod = "fallback")
     @Retry(name = "orderClient")
-    public ProcessPaymentResponse process(String key, ProcessPaymentRequest request) {
-        Optional<PaymentRequestEntity> existing = repository.findById(key);
+    public ProcessPaymentResponse process(String idempotencyKey, ProcessPaymentRequest request) {
+
+        Optional<PaymentRequestEntity> existing = repository.findById(idempotencyKey);
+
         if (existing.isPresent()) {
             PaymentRequestEntity entity = existing.get();
+            log.info("Idempotent request detected: idempotencyKey={}, existing paymentId={}, status={}", idempotencyKey, entity.getPaymentId(), entity.getStatus());
             return new ProcessPaymentResponse(entity.getPaymentId(), entity.getStatus());
         }
-        log.debug("Calling OrderService, orderId={}", request.orderId());
+
+        UUID paymentId = UUID.randomUUID();
+        log.info("Creating payment, paymentId={}, idempotencyKey={}", paymentId, idempotencyKey);
+        PaymentRequestEntity entity = new PaymentRequestEntity();
+        entity.setIdempotencyKey(idempotencyKey);
+        entity.setPaymentId(paymentId);
+        entity.setStatus(PaymentStatus.PROCESSING);
+        log.debug("Saving payment: paymentId={}, idempotencyKey={}", paymentId, idempotencyKey);
+        repository.save(entity);
+        log.info("Payment saved, status={}, paymentId={}, idempotencyKey={}", entity.getStatus(), paymentId, idempotencyKey);
+        log.debug("Calling OrderService, orderId={}, paymentId={}, idempotencyKey={}", request.orderId(), paymentId, idempotencyKey);
+
         try {
             orderClient.getById(request.orderId());
+            entity.setStatus(PaymentStatus.SUCCESS);
+            repository.save(entity);
+            log.info("Payment completed, status={}, paymentId={}, idempotencyKey={}", entity.getStatus(), paymentId, idempotencyKey);
+            return new ProcessPaymentResponse(paymentId, PaymentStatus.SUCCESS);
         } catch (RestClientResponseException ex) {
+            entity.setStatus(PaymentStatus.FAILED);
+            repository.save(entity);
+            log.error("Payment failed, status={}, paymentId={}, idempotencyKey={}, httpStatus={}", entity.getStatus(), paymentId, idempotencyKey, ex.getStatusCode(), ex);
             if (ex.getStatusCode().value() == 404) {
                 throw new OrderNotFoundException();
             }
             throw ex;
         }
-
-        UUID paymentId = UUID.randomUUID();
-
-        PaymentRequestEntity entity = new PaymentRequestEntity();
-        entity.setIdempotencyKey(key);
-        entity.setPaymentId(paymentId);
-        entity.setStatus(PaymentStatus.SUCCESS);
-
-        try {
-            repository.save(entity);
-            return new ProcessPaymentResponse(paymentId, PaymentStatus.SUCCESS);
-        } catch (DataIntegrityViolationException ex) {
-            PaymentRequestEntity exist = repository.findById(key).orElseThrow();
-            return new ProcessPaymentResponse(exist.getPaymentId(), exist.getStatus());
-        }
     }
 
-    public ProcessPaymentResponse fallback(String key, ProcessPaymentRequest request, Throwable ex) {
-        log.error("FALLBACK CALLED for orderId={}", request.orderId(), ex);
+    public ProcessPaymentResponse fallback(String idempotencyKey, ProcessPaymentRequest request, Throwable ex) {
+        log.error("Fallback triggered, orderId={}, idempotencyKey={}", request.orderId(), idempotencyKey, ex);
         throw new OrderServiceUnavailableException();
     }
 }

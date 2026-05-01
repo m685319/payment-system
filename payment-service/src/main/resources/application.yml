@@ -25,10 +25,6 @@ spring:
           failure-rate-threshold: 50
           wait-duration-in-open-state: 5s
 
-logging:
-  level:
-    dev.maria.payment.service: DEBUG
-
 management:
   endpoints:
     web:
