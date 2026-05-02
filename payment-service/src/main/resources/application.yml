@@ -10,20 +10,22 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  resilience4j:
-    retry:
-      instances:
-        orderClient:
-          max-attempts: 3
-          wait-duration: 500ms
+resilience4j:
+  retry:
+    instances:
+      orderClient:
+        max-attempts: 3
+        wait-duration: 500ms
 
-    circuitbreaker:
-      instances:
-        orderClient:
-          sliding-window-size: 10
-          minimum-number-of-calls: 5
-          failure-rate-threshold: 50
-          wait-duration-in-open-state: 5s
+  circuitbreaker:
+    instances:
+      orderClient:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        ignoreExceptions:
+         - dev.maria.payment.exception.OrderNotFoundException
 
 management:
   endpoints:

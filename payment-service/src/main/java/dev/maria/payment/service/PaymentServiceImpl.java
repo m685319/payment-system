@@ -96,6 +96,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public ProcessPaymentResponse fallback(String idempotencyKey, ProcessPaymentRequest request, Throwable ex) {
+        if (ex instanceof OrderNotFoundException orderNotFoundException) {
+            throw orderNotFoundException;
+        }
         log.error("Fallback triggered, orderId={}, idempotencyKey={}", request.orderId(), idempotencyKey, ex);
         throw new OrderServiceUnavailableException();
     }
