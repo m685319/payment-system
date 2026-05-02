@@ -1,10 +1,13 @@
 package dev.maria.payment.controller;
 
+import dev.maria.payment.dto.PaymentStatusResponse;
 import dev.maria.payment.dto.ProcessPaymentRequest;
 import dev.maria.payment.dto.ProcessPaymentResponse;
 import dev.maria.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,5 +24,10 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<ProcessPaymentResponse> process(@RequestHeader("Idempotency-Key") String key, @RequestBody ProcessPaymentRequest request) {
         return ResponseEntity.ok(paymentService.process(key, request));
+    }
+
+    @GetMapping("/{idempotencyKey}")
+    public PaymentStatusResponse getStatus(@PathVariable String idempotencyKey) {
+        return paymentService.getStatus(idempotencyKey);
     }
 }

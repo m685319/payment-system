@@ -2,6 +2,7 @@ package dev.maria.payment.service;
 
 import dev.maria.payment.client.OrderClient;
 import dev.maria.payment.domain.PaymentStatus;
+import dev.maria.payment.dto.PaymentStatusResponse;
 import dev.maria.payment.dto.ProcessPaymentRequest;
 import dev.maria.payment.dto.ProcessPaymentResponse;
 import dev.maria.payment.entity.PaymentRequestEntity;
@@ -101,5 +102,12 @@ public class PaymentServiceImpl implements PaymentService {
         }
         log.error("Fallback triggered, orderId={}, idempotencyKey={}", request.orderId(), idempotencyKey, ex);
         throw new OrderServiceUnavailableException();
+    }
+
+    public PaymentStatusResponse getStatus(String idempotencyKey) {
+        PaymentRequestEntity entity = repository.findById(idempotencyKey)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
+        return new PaymentStatusResponse(entity.getPaymentId(), entity.getStatus());
     }
 }
