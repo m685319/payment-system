@@ -28,13 +28,13 @@ public class PaymentServiceImpl implements PaymentService {
         if (existing.isPresent()) {
             var e = existing.get();
             log.info("Idempotent request: key={}, status={}", idempotencyKey, e.getStatus());
-            return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus());
+            return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus(), true);
         }
 
         var existingByOrder = repository.findByOrderId(request.orderId());
         if (existingByOrder.isPresent()) {
             var e = existingByOrder.get();
-            return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus());
+            return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus(),true);
         }
 
         UUID paymentId = UUID.randomUUID();
@@ -49,14 +49,14 @@ public class PaymentServiceImpl implements PaymentService {
             repository.save(entity);
         } catch (DataIntegrityViolationException ex) {
             var exist = repository.findById(idempotencyKey).orElseThrow();
-            return new ProcessPaymentResponse(exist.getPaymentId(), exist.getStatus());
+            return new ProcessPaymentResponse(exist.getPaymentId(), exist.getStatus(), true);
         }
 
         log.info("Payment created: paymentId={}, key={}, status=PROCESSING", paymentId, idempotencyKey);
 
         asyncProcessor.processAsync(idempotencyKey, paymentId, request.orderId());
 
-        return new ProcessPaymentResponse(paymentId, entity.getStatus());
+        return new ProcessPaymentResponse(paymentId, entity.getStatus(), false);
     }
 
     public PaymentStatusResponse getStatus(String idempotencyKey) {
