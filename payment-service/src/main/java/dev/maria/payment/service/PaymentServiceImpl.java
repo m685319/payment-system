@@ -31,11 +31,18 @@ public class PaymentServiceImpl implements PaymentService {
             return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus());
         }
 
+        var existingByOrder = repository.findByOrderId(request.orderId());
+        if (existingByOrder.isPresent()) {
+            var e = existingByOrder.get();
+            return new ProcessPaymentResponse(e.getPaymentId(), e.getStatus());
+        }
+
         UUID paymentId = UUID.randomUUID();
 
         PaymentRequestEntity entity = new PaymentRequestEntity();
         entity.setIdempotencyKey(idempotencyKey);
         entity.setPaymentId(paymentId);
+        entity.setOrderId(request.orderId());
         entity.setStatus(PaymentStatus.PROCESSING);
 
         try {
